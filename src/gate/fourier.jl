@@ -1,7 +1,7 @@
 
 abstract type AbstractFourier <: AbstractBlockGate end
 
-struct Fourier <: AbstractFourier
+mutable struct Fourier <: AbstractFourier
     block::Block
     idx::Int
     inverse::Bool
@@ -15,21 +15,21 @@ Fourier(dim, idx) = Fourier("Fourier", dim, idx)
 
 function getMatrix(gate::AbstractFourier)
     if gate.matrix === nothing
-        omega = 2π / size
-        den = sqrt(size)
-        gate.matrix = Matrix{ComplexF64}(undef, size, size)
-        for i = 1:size
-            for j = i:size
+        omega = 2π / gate.size
+        den = sqrt(gate.size)
+        gate.matrix = Matrix{ComplexF64}(undef, gate.size, gate.size)
+        for i = 1:gate.size
+            for j = i:gate.size
                 alpha = omega * (i - 1) * (j - 1)
                 s, c = sincos(alpha)
-                matrix[i, j] = ComplexF64(c / den, s / den)
+                gate.matrix[i, j] = ComplexF64(c / den, s / den)
                 if i != j
-                    matrix[j, i] = matrix[i, j]
+                    gate.matrix[j, i] = gate.matrix[i, j]
                 end
             end
         end
     end
-    return matrix
+    return gate.matrix
 end
 
 function setInverse(gate::AbstractFourier, v)
@@ -50,25 +50,25 @@ getHighestAffectedQubitIndex(gate::AbstractFourier) = gate.dim + gate.idx - 1
 
 hasOptimization(::AbstractFourier) = false      # for now, we calculate the matrix
 
-struct InvFourier <: AbstractFourier
+mutable struct InvFourier <: AbstractFourier
     block::Block
     idx::Int
     inverse::Bool
     dim::Int
     size::Int
     matrix::Union{Nothing, Matrix{ComplexF64}}
-    Fourier(name, dim, idx) = new(Block(name, dim), idx, false, dim, 1 << dim, nothing)
+    InvFourier(name, dim, idx) = new(Block(name, dim), idx, false, dim, 1 << dim, nothing)
 end
 
 InvFourier(size, idx) = InvFourier("InvFourier", size, idx)
 
 function getMatrix(gate::InvFourier)
     if gate.matrix === nothing
-        omega = 2π / size
-        den = sqrt(size)
-        gate.matrix = Matrix{ComplexF64}(undef, size, size)
-        for i = 1:size
-            for j = i:size
+        omega = 2π / gate.size
+        den = sqrt(gate.size)
+        gate.matrix = Matrix{ComplexF64}(undef, gate.size, gate.size)
+        for i = 1:gate.size
+            for j = i:gate.size
                 alpha = omega * (i - 1) * (j - 1)
                 tpd = trunc(Int, alpha / (2π))
                 if tpd > 0

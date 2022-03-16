@@ -5,7 +5,7 @@ mutable struct BlockGate <: AbstractBlockGate
     block::Block
     idx::Int
     inverse::Bool
-    AbstractBlockGate(block, idx) = new(block, idx, false)
+    BlockGate(block, idx) = new(block, idx, false)
 end
 
 setBlock(gate::AbstractBlockGate, b) = gate.block = b

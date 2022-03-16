@@ -7,7 +7,6 @@ mutable struct Cr <: AbstractTwoQubitGate
     matrix::Matrix{ComplexF64}
     pow::Int
     function Cr(a, b, exp)
-        super(a, b)
         ai, ar = sincos(exp)
         if abs(π - exp) < 1e-6
             ar = -1.0

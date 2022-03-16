@@ -14,9 +14,9 @@ end
     include("single_qubit_gate_tests.jl")
     include("two_qubit_gate_tests.jl")
     include("three_qubit_gate_tests.jl")
+    include("block_tests.jl")
+    include("fourier_test.jl")
 end
-
-#include("block_tests.jl")
 
 #include("add_integer_modulus_tests.jl")
 #include("arithmetic_tests.jl")
@@ -26,7 +26,6 @@ end
 #include("classic_tests.jl")
 #include("controlled_block_tests.jl")
 #include("exp_mul_tests.jl")
-#include("fourier_test.jl")
 #include("inverse_tests.jl")
 #include("mul_modulus_tests.jl")
 #include("oracle_tests.jl")

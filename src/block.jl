@@ -54,7 +54,7 @@ end
 
 function applyOptimize(block::Block, probs, inverse)
     simpleSteps = Step[]
-    for step in steps
+    for step in block.steps
         append!(simpleSteps, decomposeStep(step, block.nqubits))
     end
     if inverse
