@@ -37,4 +37,4 @@ getSize(::PermutationGate) = 2
 
 setInverse(gate::PermutationGate, v) = nothing
 
-Base.show(io::IO, gate::PermutationGate) = print(io, "Perm ", gate.a + ", ", gate.b)
+Base.show(io::IO, gate::PermutationGate) = print(io, "Perm ", gate.a, ", ", gate.b)

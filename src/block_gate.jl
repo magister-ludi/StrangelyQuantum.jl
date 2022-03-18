@@ -57,6 +57,6 @@ hasOptimization(::AbstractBlockGate) = true
 applyOptimize(gate::AbstractBlockGate, v) = applyOptimize(gate.block, v, gate.inverse)
 
 _show(io::IO, gate::AbstractBlockGate) =
-    print(io, "Gate for block ", gate.block, ", size = ", getSize(gate), ", inv = ", gate.inverse)
+    print(io, "Gate for ", gate.block, ", size = ", getSize(gate), ", inv = ", gate.inverse)
 
 Base.show(io::IO, gate::AbstractBlockGate) = _show(io, gate)

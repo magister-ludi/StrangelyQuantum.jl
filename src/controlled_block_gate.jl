@@ -31,7 +31,7 @@ function getAffectedQubitIndexes(gate::AbstractControlledBlockGate)
 end
 
 function getHighestAffectedQubitIndex(gate::AbstractControlledBlockGate)
-    high < 0 && calculateHighLow(gate)
+    gate.high < 0 && calculateHighLow(gate)
     return gate.haq
 end
 
@@ -47,7 +47,7 @@ function calculateHighLow(gate::AbstractControlledBlockGate)
     gate.high = gate.control
     gap = gate.control - gate.idx
     bs = getNQubits(gate.block)
-    gate.low = 0
+    gate.low = 1
     if gate.control > gate.idx
         gate.low = gate.idx
         if gap < bs
@@ -88,7 +88,7 @@ function getMatrix(gate::AbstractControlledBlockGate)
             gmlow = gate.idx
             if gap > bs
                 gate.high = gate.control
-                size = gate.high - gmlow + 1
+                gate.size = gate.high - gmlow + 1
                 pg = PermutationGate(
                     gate.control - gmlow,
                     gate.control - gmlow - gap + bs,
@@ -100,20 +100,23 @@ function getMatrix(gate::AbstractControlledBlockGate)
             gmlow = gate.control
             gate.high = gate.idx + bs - 1
             gate.size = gate.high - gmlow + 1
-            for i = 1:(size - 1)
-                pg = PermutationGate(i, i + 1, size)
+            for i = 1:(gate.size - 1)
+                pg = PermutationGate(i, i + 1, gate.size)
                 pushfirst!(perm, pg)
             end
         end
 
         part = getMatrix(gate.block)
-        dim = length(part)
+        dim = size(part, 1)
         gate.matrix = Matrix{ComplexF64}(I, 2 * dim, 2 * dim)
-        for i = 1:dim
-            for j = 1:dim
-                gate.matrix[i + dim, j + dim] = part[i, j]
+        #=
+        for i = 0:(dim - 1)
+            for j = 0:(dim - 1)
+                gate.matrix[i + dim, j + dim] = part[i + 1, j + 1]
             end
         end
+        =#
+        @views gate.matrix[(dim + 1):end, (dim + 1):end] .= part
     else
         #System.err.println("Matrix was cached")
     end
@@ -123,14 +126,14 @@ end
 hasOptimization(::AbstractControlledBlockGate) = true
 
 function applyOptimize(gate::AbstractControlledBlockGate, v)
-    size = length(v)
-    answer = Vector{ComplexF64}(undef, size)
-    dim = size ÷ 2
+    gate.size = length(v)
+    answer = Vector{ComplexF64}(undef, gate.size)
+    dim = gate.size ÷ 2
     oldv = Vector{ComplexF64}(undef, dim)
     for i = 1:dim
         oldv[i] = v[i + dim]
     end
-    p2 = applyOptimize(block, oldv, gate.inverse)
+    p2 = applyOptimize(gate.block, oldv, gate.inverse)
     for i = 1:dim
         answer[i] = v[i]
         answer[dim + i] = p2[i]

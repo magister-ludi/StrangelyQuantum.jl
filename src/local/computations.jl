@@ -4,11 +4,9 @@ function calculateStepMatrix(gates, nQubits)
     idx = nQubits
     while idx > 0
         cnt = idx
-        myGate = findfirst(gate -> getHighestAffectedQubitIndex(gate) == cnt, gates)
-        if myGate === nothing
-            myGate = Identity(idx)
-        end
-        dbg("stepmatrix, cnt = ", cnt, ", idx = ", idx + ", myGate = ", myGate)
+        gateidx = findfirst(gate -> getHighestAffectedQubitIndex(gate) == cnt, gates)
+        myGate = gateidx === nothing ? Identity(idx) : gates[gateidx]
+        dbg("stepmatrix, cnt = ", cnt, ", idx = ", idx, ", myGate = ", myGate)
         if myGate isa AbstractBlockGate
             dbg("calculateStepMatrix for blockgate ", myGate, " of class ", typeof(myGate))
             a = kron(a, getMatrix(myGate))
@@ -66,10 +64,11 @@ function decomposeStep(s::Step, nqubit)
                 string(
                     "Only ",
                     nqubit,
-                    " qubits available while Gate ",
+                    " qubits available while gate \"",
                     gate,
-                    " requires qubit ",
+                    "\" requires ",
                     getHighestAffectedQubitIndex(gate),
+                    " qubits.",
                 ),
             )
         end
@@ -269,8 +268,6 @@ function getNextProbability(gates, v)
     gatedim = 1 << nqubits
     size = length(v)
     dbg("GETNEXTPROBABILITY asked for size = ", size, " and gates = ", gates)
-    dbg("Starting with")
-    printProbs(v)
     if length(gates) > 1
         partdim = size ÷ gatedim
         answer = Vector{ComplexF64}(undef, size)
@@ -304,8 +301,6 @@ function getNextProbability(gates, v)
                 end
                 dbg("done part")
             end
-            dbg("Returning ", length(answer), " values")
-            printProbs(answer)
             return answer
         end
 
@@ -326,8 +321,6 @@ function getNextProbability(gates, v)
                 end
             end
         end
-        dbg("Returning ", length(answer), " values")
-        printProbs(answer)
         return answer
     else
         if gatedim != size
@@ -336,8 +329,6 @@ function getNextProbability(gates, v)
         end
         if hasOptimization(gate)
             answer = applyOptimize(gate, v)
-            dbg("Returning ", length(answer), " values")
-            printProbs(answer)
             return applyOptimize(gate, v)
         else
             matrix = getMatrix(gate)
@@ -350,8 +341,6 @@ function getNextProbability(gates, v)
             #end
             #return answer
             answer = matrix * v
-            dbg("Returning ", length(answer), " values")
-            printProbs(answer)
             return matrix * v
         end
     end
@@ -416,7 +405,7 @@ function processBlockGate(gate::AbstractControlledBlockGate, answer)
     control = getControlQubit(gate)
     idx = getMainQubitIndex(gate)
     high = control
-    size = getSize(gate)
+    gate_size = getSize(gate)
     gap = control - idx
     perm = PermutationGate[]
     block = getBlock(gate)
@@ -429,17 +418,17 @@ function processBlockGate(gate::AbstractControlledBlockGate, answer)
         low = idx
         if gap > bs
             high = control
-            size = high - low + 1
-            pg = PermutationGate(control, control - gap + bs, low + size)
+            gate_size = high - low + 1
+            pg = PermutationGate(control, control - gap + bs, low + gate_size)
             push!(perm, pg)
         end
     else
         low = control
         high = idx + bs - 1
-        size = high - low + 1
+        gate_size = high - low + 1
         # gate.correctHigh(low+bs)
-        for i = low:(low + size)
-            pg = PermutationGate(i, i + 1, low + size)
+        for i = low:(low + gate_size - 2)
+            pg = PermutationGate(i, i + 1, low + gate_size)
             pushfirst!(perm, pg)
         end
     end

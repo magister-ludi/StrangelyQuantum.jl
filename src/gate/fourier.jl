@@ -18,8 +18,8 @@ function getMatrix(gate::AbstractFourier)
         omega = 2π / gate.size
         den = sqrt(gate.size)
         gate.matrix = Matrix{ComplexF64}(undef, gate.size, gate.size)
-        for i = 1:gate.size
-            for j = i:gate.size
+        for i = 1:(gate.size)
+            for j = i:(gate.size)
                 alpha = omega * (i - 1) * (j - 1)
                 s, c = sincos(alpha)
                 gate.matrix[i, j] = ComplexF64(c / den, s / den)
@@ -34,12 +34,14 @@ end
 
 function setInverse(gate::AbstractFourier, v)
     if v
-        gate.matrix .= gate.matrix'
+        m = getMatrix(gate)
+        gate.matrix .= m'
     end
 end
 
 function inverse(gate::AbstractFourier)
-    gate.matrix .= gate.matrix'
+    m = getMatrix(gate)
+    gate.matrix .= m'
     return gate
 end
 
@@ -67,8 +69,8 @@ function getMatrix(gate::InvFourier)
         omega = 2π / gate.size
         den = sqrt(gate.size)
         gate.matrix = Matrix{ComplexF64}(undef, gate.size, gate.size)
-        for i = 1:gate.size
-            for j = i:gate.size
+        for i = 1:(gate.size)
+            for j = i:(gate.size)
                 alpha = omega * (i - 1) * (j - 1)
                 tpd = trunc(Int, alpha / (2π))
                 if tpd > 0

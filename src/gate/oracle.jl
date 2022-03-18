@@ -13,8 +13,9 @@ function Oracle(matrix::AbstractMatrix{<:Complex})
     gate.matrix = matrix
     span = trunc(Int, log2(size(matrix, 1)))
     for i = 1:span
-        setAdditionalQubit(gat, i, i)
+        setAdditionalQubit(gate, i, i)
     end
+    return gate
 end
 
 getSize(gate::Oracle) = gate.span

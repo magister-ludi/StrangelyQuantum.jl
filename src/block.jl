@@ -10,9 +10,7 @@ mutable struct Block
 
     #=
     Create a named block spanning size qubits
-    @param name the name of the block
-    @param size the number of (adjacent) qubits in this block
-     =#
+    =#
     Block(name::AbstractString, size::Integer) = new((blockCount[] += 1), name, size, [], nothing)
 end
 
@@ -91,4 +89,4 @@ function applyStep(block::Block, step, vector)
     return result
 end
 
-Base.show(io::IO, block::Block) = print(io, "Block ", block.id, " named ", name)
+Base.show(io::IO, block::Block) = print(io, "Block ", block.id, " named ", block.name)

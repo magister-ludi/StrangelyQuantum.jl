@@ -13,6 +13,9 @@ function dbg(s...)
     end
 end
 
+#dbg2(s...)= dbg(s...)
+dbg2(s...) = nothing
+
 function setLogfile(logname, replace = true)
     logFile[] = logname
     if replace
