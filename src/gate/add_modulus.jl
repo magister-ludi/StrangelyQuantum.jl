@@ -1,5 +1,5 @@
 
-struct AddModulus <: AbstractBlockGate
+mutable struct AddModulus <: AbstractBlockGate
     block::Block
     idx::Int
     inverse::Bool
@@ -14,38 +14,38 @@ struct AddModulus <: AbstractBlockGate
     qubit at x_1 should be 0 and qubit at y_1 should be 0 (overflow)
     =#
     function AddModulus(x0, x1, y0, y1, nn)
-        #y1 = y1 - x0
-        #y0 = y0 - x0
-        #x1 = x1 - x0
-        #x0 = 0
         @assert y0 == x1 + 1
-        return new(createBlock(AddModulus, 0, x1 - x0, y0 - x0, y1 - x0, nn), x0, false)
+        return new(createBlock(AddModulus, x0, x1, y0, y1, nn), x0, false)
     end
 end
 
 function createBlock(::Type{AddModulus}, x0, x1, y0, y1, nn)
-    error("Indices used in this function are wrong!")
     answer = Block("AddModulus", y1 - x0 + 2)
     n = x1 - x0
     dim = 2 * (n + 1) + 1
+
+    x1 -= x0 - 1
+    y0 -= x0 - 1
+    y1 -= x0 - 1
+    x0 = 1
 
     add = Add(x0, x1, y0, y1)
     addStep(answer, Step(add))
 
     min = inverse(AddInteger(x0, x1, nn))
     addStep(answer, Step(min))
-    addStep(answer, Step(Cnot(x1, dim - 1)))
+    addStep(answer, Step(Cnot(x1, dim)))
     addN = AddInteger(x0, x1, nn)
-    cbg = AbstractControlledBlockGate(addN, x0, dim - 1)
+    cbg = ControlledBlockGate(addN, x0, dim)
     addStep(answer, Step(cbg))
 
     add2 = inverse(Add(x0, x1, y0, y1))
     addStep(answer, Step(add2))
-    addStep(answer, Step(X(dim - 1)))
+    addStep(answer, Step(X(dim)))
 
-    block = Block(2)
-    addStep(block, Step(X(0)))
-    cbg2 = AbstractControlledBlockGate(block, dim - 1, x1)
+    block = Block(1)
+    addStep(block, Step(X(1)))
+    cbg2 = ControlledBlockGate(block, dim, x1)
     addStep(answer, Step(cbg2))
 
     add3 = Add(x0, x1, y0, y1)

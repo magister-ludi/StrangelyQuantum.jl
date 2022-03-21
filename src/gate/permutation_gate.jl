@@ -5,8 +5,8 @@ struct PermutationGate <: Gate
     n::Int
     affected::Vector{Int}
     function PermutationGate(a, b, n)
-        @assert 1 ≤ a ≤ n
-        @assert 1 ≤ b ≤ n
+        1 ≤ a ≤ n || error("Expected 1 ≤ a ≤ $n, a = $a")
+        1 ≤ b ≤ n || error("Expected 1 ≤ b ≤ $n, b = $b")
         return new(a, b, n, collect(1:n))
     end
 end

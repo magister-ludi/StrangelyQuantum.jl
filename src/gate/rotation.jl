@@ -41,7 +41,7 @@ function setInverse(gate::AbstractRotation, v)
 end
 
 getCaption(gate::AbstractRotation) =
-    string("Rotation about ", name(gate.axis), " with angle ", gate.thetav)
+    @sprintf("Rotation about %s with angle %f", name(gate.axis), gate.thetav)
 
 struct RotationX <: AbstractRotation
     idx::Int
@@ -56,7 +56,7 @@ struct RotationX <: AbstractRotation
     end
 end
 
-getCaption(gate::RotationX) = string("RotationX ", gate.thetav)
+getCaption(gate::RotationX) = @sprintf("RotationX %f", gate.thetav)
 
 struct RotationY <: AbstractRotation
     idx::Int
@@ -71,7 +71,7 @@ struct RotationY <: AbstractRotation
     end
 end
 
-getCaption(gate::RotationY) = string("RotationY ", gate.thetav)
+getCaption(gate::RotationY) = @sprintf("RotationY %f", gate.thetav)
 
 struct RotationZ <: AbstractRotation
     idx::Int
@@ -86,4 +86,4 @@ struct RotationZ <: AbstractRotation
     end
 end
 
-getCaption(gate::RotationZ) = string("RotationZ ", gate.thetav)
+getCaption(gate::RotationZ) = @sprintf("RotationZ %f", gate.thetav)

@@ -15,7 +15,7 @@ const Δ_Overflow = 0.000000001
     #@show probs
     q = getQubits(result)
     #@show q
-    @show measure.(q)
+    #@show measure.(q)
 end
 =#
 

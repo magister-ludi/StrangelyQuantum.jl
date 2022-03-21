@@ -5,7 +5,10 @@ mutable struct R <: AbstractSingleQubitGate
     expv::Float64
     pow::Int
     matrix::Matrix{ComplexF64}
-    R(exp, idx) = new(idx, false, exp, -1, [1 0; cos(exp) sin(exp)])
+    function R(exp, idx)
+        s, c = sincos(exp)
+        return new(idx, false, exp, -1, [1 0; 0 Complex(c, s)])
+    end
 end
 
 function R(base, pow, idx)

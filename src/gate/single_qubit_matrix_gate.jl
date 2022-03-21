@@ -1,5 +1,5 @@
 
-struct SingleQubitMatrixGate <: AbstractSingleQubitGate
+mutable struct SingleQubitMatrixGate <: AbstractSingleQubitGate
     idx::Int
     inverse::Bool
     matrix::Matrix{ComplexF64}
@@ -13,4 +13,5 @@ function setInverse(gate::SingleQubitMatrixGate, v)
     gate.matrix .= gate.matrix'
 end
 
-Base.show(io::IO, gate::SingleQubitMatrixGate) = print(io, "SingleQubitMatrixGate with index ", idx)
+Base.show(io::IO, gate::SingleQubitMatrixGate) =
+    print(io, "SingleQubitMatrixGate with index ", gate.idx)

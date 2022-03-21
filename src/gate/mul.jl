@@ -13,9 +13,9 @@ struct Mul <: AbstractBlockGate
     Mul(x0, x1, mul) = new(createBlock(Mul, x0, x1, mul), x0, false)
 end
 
-function createBlock(::Type{Mul}, y0, y1, mul)
-    x0 = 0
-    x1 = y1 - y0
+function createBlock(::Type{Mul}, x0, x1, mul)
+    x1 -= x0 - 1
+    x0 = 1
     size = 1 + x1 - x0
     dim = 1 << size
     answer = Block("Mul", 2 * size)

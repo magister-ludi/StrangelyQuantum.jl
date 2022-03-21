@@ -22,7 +22,6 @@ mutable struct Cr <: AbstractTwoQubitGate
             0 0 1 0
             0 0 0 ComplexF64(ar, ai)
         ]
-        dbg("Constructor Cr: ", (a, b))
         return new(a, b, max(a, b), false, matrix, -1)
     end
 end

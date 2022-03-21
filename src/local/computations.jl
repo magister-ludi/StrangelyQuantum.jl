@@ -328,19 +328,9 @@ function getNextProbability(gates, v)
             error("wrong matrix size $gatedim vs vector size $size")
         end
         if hasOptimization(gate)
-            answer = applyOptimize(gate, v)
             return applyOptimize(gate, v)
         else
             matrix = getMatrix(gate)
-            # answer =  ComplexF64[size]
-            #for (int i = 0  i < size  i++)
-            #    answer[i] = ComplexF64.ZERO
-            #    for (int j = 0  j < size  j++)
-            #        answer[i] = answer[i].add(matrix[i][j].mul(v[j]))
-            #    end
-            #end
-            #return answer
-            answer = matrix * v
             return matrix * v
         end
     end

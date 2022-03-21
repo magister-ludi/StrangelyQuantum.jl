@@ -89,7 +89,18 @@ end
 
 function printProbs(probs)
     for p in probs
-        dbg(" -> (", real(p), ", ", imag(p), ")")
+        r, i = real(p), imag(p)
+        if abs(r) < 1e-6
+            r = 0.0
+        elseif 1-abs(r) < 1e-6
+            r = 1.0
+        end
+        if abs(i) < 1e-6
+            i = 0.0
+        elseif 1-abs(i) < 1e-6
+            i = 1.0
+        end
+        dbg(" -> (", r, ", ", i, ")")
     end
 end
 
@@ -97,7 +108,7 @@ function printMatrix(m)
     for row = 1:size(m, 1)
         s = ""
         for col = 1:size(m, 2)
-            s *= string(" (", real(m[row, col]), ", ", imag(m[row, col]), ")")
+            s *= @sprintf(" (%f, %f)", real(m[row, col]), imag(m[row, col]))
         end
         dbg(" |", s, " |")
     end

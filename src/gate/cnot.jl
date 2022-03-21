@@ -1,5 +1,5 @@
 
-struct Cnot <: AbstractTwoQubitGate
+mutable struct Cnot <: AbstractTwoQubitGate
     first::Int
     second::Int
     highest::Int

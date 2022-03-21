@@ -1,5 +1,5 @@
 
-struct X <: AbstractSingleQubitGate
+mutable struct X <: AbstractSingleQubitGate
     idx::Int
     inverse::Bool
     matrix::Matrix{ComplexF64}
@@ -10,7 +10,7 @@ getMatrix(gate::X) = gate.matrix
 
 getCaption(::X) = "X"
 
-struct Y <: AbstractSingleQubitGate
+mutable struct Y <: AbstractSingleQubitGate
     idx::Int
     inverse::Bool
     matrix::Matrix{ComplexF64}
@@ -21,7 +21,7 @@ getMatrix(gate::Y) = gate.matrix
 
 getCaption(::Y) = "Y"
 
-struct Z <: AbstractSingleQubitGate
+mutable struct Z <: AbstractSingleQubitGate
     idx::Int
     inverse::Bool
     matrix::Matrix{ComplexF64}
