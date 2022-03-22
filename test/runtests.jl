@@ -7,7 +7,7 @@ function StrangelyQuantum.runProgram(program::Program)
     qee = SimpleQuantumExecutionEnvironment()
     return runProgram(qee, program)
 end
-
+#
 @testset "StrangelyQuantum" begin
     include("initial_state_tests.jl")
     include("syntax_tests.jl")
@@ -23,12 +23,12 @@ end
     include("bell_state_test.jl")
     include("rotation_tests.jl")
     include("arithmetic_1_tests.jl")
+    include("arithmetic_2_tests.jl")
+    include("arithmetic_3_tests.jl")
 end
 
 
 #include("add_integer_modulus_tests.jl")
-#include("arithmetic_2_tests.jl")
-#include("arithmetic_3_tests.jl")
 #include("classic_tests.jl")
 #include("exp_mul_tests.jl")
 #include("mul_modulus_tests.jl")
