@@ -1,5 +1,5 @@
 
-struct Hadamard <: AbstractSingleQubitGate
+mutable struct Hadamard <: AbstractSingleQubitGate
     idx::Int
     inverse::Bool
     matrix::Matrix{ComplexF64}

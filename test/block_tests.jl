@@ -10,10 +10,10 @@ end
 mutable struct DummyBlockGate <: AbstractBlockGate
     idx::Int
     inverse::Bool
-    block::Block
     addedStep::Union{Nothing, Step}
+    block::Block
     function DummyBlockGate(idx, step)
-        gate = new(idx, false)
+        gate = new(idx, false, nothing)
         gate.block = createBlock(gate)
         gate.addedStep = step
         return gate
@@ -22,7 +22,7 @@ end
 
 DummyBlockGate(idx) = DummyBlockGate(idx, nothing)
 
-function createBlock(::DummyBlockGate)
+function createBlock(gate::DummyBlockGate)
     answer = Block("Dummy", 2)
     addStep(answer, Step(X(2)))
     if gate.addedStep !== nothing
@@ -49,8 +49,8 @@ end
 
 GenericBlockGate(idx, dim) = GenericBlockGate(idx, dim, [])
 
-function createBlock(::GenericBlockGate)
-    answer = Block("Generic", dim)
+function createBlock(gate::GenericBlockGate)
+    answer = Block("Generic", gate.dim)
     for step in gate.steps
         addStep(answer, step)
     end
@@ -60,19 +60,6 @@ end
 hasOptimization(::GenericBlockGate) = true
 
 @testset "Block Tests" begin
-
-    #    @Test
-    #    public void addWrongIndex()
-    #        Block block =  Block(2)
-    #        addStep(block, Step(x(0)))
-    #        assertThrows(
-    #                IllegalArgumentException.class,
-    #                () . block.addGate(x(2)))
-    #        assertThrows(
-    #                IllegalArgumentException.class,
-    #                () . block.addGate(cnot(2, 1)))
-    #        block.addGate(x(1))
-    #    }
     @testset "create Block In Program" begin
         block = Block(1)
         addStep(block, Step(Identity(1)))
@@ -188,180 +175,178 @@ end
             end
         end
     end
-end
-#=
+
     @testset "compareBlock2" begin
-        for (int a = 1  a < 2  a++)
-            for (int b = 0  b < 1  b++)
-                 prep =  Step()
-                if (a % 2 == 1)
-                    addGate(prep, X(1))
-                end
-                if (b % 2 == 1)
-                    addGate(prep, X(2))
-                end
+        a = 1
+        b = 0
+        prep = Step()
+        if isodd(a)
+            addGate(prep, X(2))
+        end
+        if isodd(b)
+            addGate(prep, X(3))
+        end
 
-                 p =  Program(4)
+        p = Program(4)
 
-                 s0 =  Step( Toffoli(1,2,3))
-                 s1 =  Step( Cnot(1, 2))
-                addSteps(p,prep, s0, s1)
-                 normal = runProgram(p)
-                 normalQ = normal.getQubits()
+        s0 = Step(Toffoli(2, 3, 4))
+        s1 = Step(Cnot(2, 3))
+        addSteps(p, prep, s0, s1)
+        normal = runProgram(p)
+        normalQ = getQubits(normal)
 
-                 carry =  Block("carry", 4)
-                addStep(carry, Step( Toffoli(1,2,3)))
-                addStep(carry, Step( Cnot(1, 2)))
+        carry = Block("carry", 4)
+        addStep(carry, Step(Toffoli(2, 3, 4)))
+        addStep(carry, Step(Cnot(2, 3)))
 
-                 bp =  Program(4)
-                 bs0 =  Step( BlockGate(carry, 0))
-                baddSteps(p,prep, bs0)
-                 blockResult = runProgram(bp)
-                 blockQ = blockResult.getQubits()
+        bp = Program(4)
+        bs0 = Step(BlockGate(carry, 1))
+        addSteps(bp, prep, bs0)
+        blockResult = runProgram(bp)
+        blockQ = getQubits(blockResult)
 
-                @test normalQ.length ==  blockQ.length
-                for (int i = 0  i < normalQ.length  i++)
-                    @test normalQ[i].measure() ==  blockQ[i].measure()
-                end
-            end
+        @test length(normalQ) == length(blockQ)
+        for i = 1:length(normalQ)
+            @test measure(normalQ[i]) == measure(blockQ[i])
         end
     end
 
     @testset "testDummyBlockGate" begin
-         dbg =  DummyBlockGate(0)
-         bp =  Program(2)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 1 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
+        dbg = DummyBlockGate(1)
+        bp = Program(2)
+        bs0 = Step(dbg)
+        addSteps(bp, bs0)
+        result = runProgram(bp)
+        qubits = getQubits(result)
+        @test 1 == measure(qubits[1])
+        @test 1 == measure(qubits[2])
     end
 
     @testset "testDummyBlockGate2" begin
-         dbg =  DummyBlockGate(1)
-         bp =  Program(3)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
-        @test 1 ==  measure(qubits[3])
+        dbg = DummyBlockGate(2)
+        bp = Program(3)
+        bs0 = Step(dbg)
+        addSteps(bp, bs0)
+        result = runProgram(bp)
+        qubits = getQubits(result)
+        @test 0 == measure(qubits[1])
+        @test 1 == measure(qubits[2])
+        @test 1 == measure(qubits[3])
     end
 
     @testset "testDummyBlockGateInv" begin
-         dbg =  DummyBlockGate(0).inverse()
-         bp =  Program(2)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
+        dbg = inverse(DummyBlockGate(1))
+        bp = Program(2)
+        bs0 = Step(dbg)
+        addSteps(bp, bs0)
+        result = runProgram(bp)
+        qubits = getQubits(result)
+        @test 0 == measure(qubits[1])
+        @test 1 == measure(qubits[2])
     end
+end
 
-    @testset "testDummyBlockGateInv2" begin
-         dbg =  DummyBlockGate(1).inverse()
-         bp =  Program(3)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 0 ==  measure(qubits[2])
-        @test 1 ==  measure(qubits[3])
-    end
+@testset "testDummyBlockGateInv2" begin
+    dbg = inverse(DummyBlockGate(2))
+    bp = Program(3)
+    bs0 = Step(dbg)
+    addSteps(bp, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 0 == measure(qubits[1])
+    @test 0 == measure(qubits[2])
+    @test 1 == measure(qubits[3])
+end
 
-    @testset "testDummyBlockGateR" begin
-         dbg =  DummyBlockGate(0,  Step( R(2,0)))
-         bp =  Program(2)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 1 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
-    end
+@testset "testDummyBlockGateR" begin
+    dbg = DummyBlockGate(1, Step(R(2, 1)))
+    bp = Program(2)
+    bs0 = Step(dbg)
+    addSteps(bp, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 1 == measure(qubits[1])
+    @test 1 == measure(qubits[2])
+end
 
-    @testset "testDummyBlockGateR2" begin
-         dbg =  DummyBlockGate(1,  Step( R(2,0)))
-         bp =  Program(3)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
-        @test 1 ==  measure(qubits[3])
-    end
+@testset "testDummyBlockGateR2" begin
+    dbg = DummyBlockGate(2, Step(R(2, 1)))
+    bp = Program(3)
+    bs0 = Step(dbg)
+    addSteps(bp, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 0 == measure(qubits[1])
+    @test 1 == measure(qubits[2])
+    @test 1 == measure(qubits[3])
+end
 
-    @testset "testDummyBlockGateRinv" begin
-         dbg =  DummyBlockGate(0,  Step( R(2,0))).inverse()
-         bp =  Program(2)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
-    end
+@testset "testDummyBlockGateRinv" begin
+    dbg = inverse(DummyBlockGate(1, Step(R(2, 1))))
+    bp = Program(2)
+    bs0 = Step(dbg)
+    addSteps(bp, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 0 == measure(qubits[1])
+    @test 1 == measure(qubits[2])
+end
 
-    @testset "testDummyBlockGateRinv2" begin
-         dbg =  DummyBlockGate(1,  Step( R(2,0))).inverse()
-         bp =  Program(3)
-         bs0 =  Step(dbg)
-        baddSteps(p,bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        @test 0 ==  measure(qubits[1])
-        @test 0 ==  measure(qubits[2])
-        @test 1 ==  measure(qubits[3])
-    end
+@testset "testDummyBlockGateRinv2" begin
+    dbg = inverse(DummyBlockGate(2, Step(R(2, 1))))
+    bp = Program(3)
+    bs0 = Step(dbg)
+    addSteps(bp, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 0 == measure(qubits[1])
+    @test 0 == measure(qubits[2])
+    @test 1 == measure(qubits[3])
+end
 
-    @testset "testGenericBlockGateHHF" begin
-         prep =  Step( X(0))
-        <Step> steps =  ArrayList<>()
-        steps.add( Step( Hadamard(0),  Hadamard(1)))
-        steps.add( Step( Fourier(2,0)))
-         dbg =  GenericBlockGate(0, 2, steps).inverse()
-         bp =  Program(2)
-         bs0 =  Step(dbg)
-        baddSteps(p,prep, bs0)
-         result = runProgram(bp)
-         probability = result.getProbability()
-         EPS = (Float32)1e-4
-        @test 0, probability[1].r ==  EPS
-        @test 0, probability[1].i ==  EPS
-        @test 0, probability[2].r ==  EPS
-        @test 0, probability[2].i ==  EPS
-        @test 0.5, probability[3].r ==  EPS
-        @test -0.5, probability[3].i ==  EPS
-        @test 0.5, probability[4].r ==  EPS
-        @test 0.5, probability[4].i ==  EPS
+@testset "testGenericBlockGateHHF" begin
+    prep = Step(X(1))
+    steps = Step[]
+    push!(steps, Step(Hadamard(1), Hadamard(2)))
+    push!(steps, Step(Fourier(2, 1)))
+    dbg = inverse(GenericBlockGate(1, 2, steps))
+    bp = Program(2)
+    bs0 = Step(dbg)
+    addSteps(bp, prep, bs0)
+    result = runProgram(bp)
+    probability = getProbability(result)
+    EPS = 1e-4
+    @test 0 ≈ real(probability[1]) atol = EPS
+    @test 0 ≈ imag(probability[1]) atol = EPS
+    @test 0 ≈ real(probability[2]) atol = EPS
+    @test 0 ≈ imag(probability[2]) atol = EPS
+    @test 0.5 ≈ real(probability[3]) atol = EPS
+    @test -0.5 ≈ imag(probability[3]) atol = EPS
+    @test 0.5 ≈ real(probability[4]) atol = EPS
+    @test 0.5 ≈ imag(probability[4]) atol = EPS
+end
 
-    end
+@testset "testGenericBlockGateAMF" begin
+    steps = Step[]
+    prep = Step(X(3))
+    x0 = 1
+    x1 = 2
+    nn = 1
+    dim = 3
+    y0 = 3
+    y1 = 4
 
-    @testset "testGenericBlockGateAMF" begin
-        <Step> steps =  ArrayList<>()
-         prep =  Step( X(2))
-        int x0 = 0  int x1 = 1  int N = 1  int dim = 3  int y0 = 2  int y1 = 3
+    addN = AddInteger(x0, x1, nn)
+    cbg = ControlledBlockGate(addN, x0, 3)
+    push!(steps, Step(cbg))
 
-         addN =  AddInteger(x0,x1,N)
-         cbg =  AbstractControlledBlockGate(addN, x0,2)
-        steps.add( Step(cbg))
-
-         dbg =  GenericBlockGate(0, dim, steps).inverse()
-         bp =  Program(3)
-         bs0 =  Step(dbg)
-        baddSteps(p,prep, bs0)
-         result = runProgram(bp)
-         qubits = getQubits(result)
-        for (int i = 0  i < dim  i++)
-         #   System.err.println("m["+i+"]: "+measure(qubits[i]))
-        end
-        @test 1 ==  measure(qubits[1])
-        @test 1 ==  measure(qubits[2])
-        @test 1 ==  measure(qubits[3])
-    end
-=#
+    dbg = inverse(GenericBlockGate(1, dim, steps))
+    bp = Program(3)
+    bs0 = Step(dbg)
+    addSteps(bp, prep, bs0)
+    result = runProgram(bp)
+    qubits = getQubits(result)
+    @test 1 == measure(qubits[1])
+    @test 1 == measure(qubits[2])
+    @test 1 == measure(qubits[3])
+end

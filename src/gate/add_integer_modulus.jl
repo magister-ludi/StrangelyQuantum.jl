@@ -4,7 +4,7 @@
 Create a `Gate` computes `(a+x) % n`, where `x` register
 is the content of register x. The result is placed in register x
 """
-struct AddIntegerModulus <: AbstractBlockGate
+mutable struct AddIntegerModulus <: AbstractBlockGate
     block::Block
     idx::Int
     inverse::Bool
