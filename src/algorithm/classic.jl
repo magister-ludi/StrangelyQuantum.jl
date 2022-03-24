@@ -1,4 +1,9 @@
 
+module Classic
+
+using LinearAlgebra
+using ..StrangelyQuantum
+
 const qee = Ref{QuantumExecutionEnvironment}(SimpleQuantumExecutionEnvironment())
 
 setQuantumExecutionEnvironment(val::QuantumExecutionEnvironment) = qee[] = val
@@ -23,31 +28,35 @@ function qsum(a::Integer, b::Integer)
     prep = Step()
     y0 = y
     for i = 1:m
-        p = 1 << (m - i - 2)
+        p = 1 << (m - i)
         if y0 >= p
-            addGate(prep, X(m - i - 2))
+            addGate(prep, X(m - i + 1))
             y0 -= p
         end
     end
     x0 = x
     for i = 1:n
-        p = 1 << (n - i - 2)
+        p = 1 << (n - i)
         if x0 >= p
-            addGate(prep, X(m + n - i - 2))
+            addGate(prep, X(m + n - i + 1))
             x0 -= p
         end
     end
     addStep(program, prep)
     addStep(program, Step(Fourier(m, 1)))
     for i = 1:m
-        for j = 1:(m - i)
-            cr0 = 2 * m - j - i - 2
+        for j = 1:(m - i + 1)
+            cr0 = 2 * m - j - i + 2
+            dbg("i = ", i)
+            dbg("j = ", j)
+            dbg("cr0 = ", cr0)
             if cr0 ≤ m + n
-                s = Step(Cr(i, cr0, 2, 1 + j))
+                s = Step(Cr(i, cr0, 2, j))
                 addStep(program, s)
             end
         end
     end
+
     addStep(program, Step(InvFourier(m, 1)))
     res = runProgram(qee[], program)
     qubits = getQubits(res)
@@ -73,7 +82,7 @@ by the function, returns 1.
 function search(func::Function, list::AbstractVector{T}) where {T}
     probability = searchProbabilities(func, list)
     wv, winner = findmax(probability)
-    println(stderr, "winner = ", winner, " with prob ", wv)
+    dbg("winner = ", winner, " with prob ", wv)
     return list[winner]
 end
 
@@ -98,21 +107,26 @@ function searchProbabilities(func::Function, list::AbstractVector{T}) where {T}
     for i = 1:n
         addGate(s0, Hadamard(i))
     end
+    dbg("Adding step 0: ", s0)
     addStep(p, s0)
     setCaption(oracle, "O")
     dif = createDiffMatrix(n)
     difOracle = Oracle(dif)
     setCaption(difOracle, "D")
-    for i = 2:cnt
+    nc = trunc(Int, cnt)
+    for i = 1:nc
         s1 = Step("Oracle $i")
         addGate(s1, oracle)
         s2 = Step("Diffusion $i")
         addGate(s2, difOracle)
         s3 = Step("Prob $i")
         addGate(s3, ProbabilitiesGate(1))
+        dbg("Adding step 1: ", s1)
+        dbg("Adding step 2: ", s2)
+        dbg("Adding step 3: ", s3)
         addSteps(p, s1, s2, s3)
     end
-    println(" n = ", n, ", steps = ", cnt)
+    dbg(" n = ", n, ", steps = ", cnt)
 
     res = runProgram(qee[], p)
     probability = getProbability(res)
@@ -130,7 +144,7 @@ function findPeriod(a::Integer, mod::Integer)
     while p == 0 && tries < maxtries
         p = measurePeriod(a, mod)
         if p == 0
-            println(stderr, "We measured a periodicity of 0, and have to start over.")
+            dbg("We measured a periodicity of 0, and have to start over.")
         end
     end
     p == 0 && return -1
@@ -139,29 +153,29 @@ end
 
 function qfactor(nn::Integer)
     nn = Int(nn)
-    println("We need to factor ", nn)
+    dbg("We need to factor ", nn)
     a = 1 + trunc(Int, (nn - 1) * rand(StrangeRNG))
-    println("Pick a random number a, a < nn: ", a)
+    dbg("Pick a random number a, a < nn: ", a)
     gcdan = gcd(nn, a)
-    println("calculate gcd(a, nn):", gcdan)
+    dbg("calculate gcd(a, nn):", gcdan)
     gcdan != 1 && return gcdan
 
     p = findPeriod(a, nn)
     if p == -1
-        println(stderr, "After too many tries with ", a, ", we need to pick a new random number.")
+        dbg("After too many tries with ", a, ", we need to pick a new random number.")
         return qfactor(nn)
     end
 
-    println("period of f = ", p)
+    dbg("period of f = ", p)
     if isodd(p)
-        println("bummer, odd period, restart.")
+        dbg("bummer, odd period, restart.")
         return qfactor(nn)
     end
 
     md = trunc(Int, a^(p ÷ 2) + 1)
     m2 = md % nn
     if m2 == 0
-        println("bummer, m^p/2 + 1 = 0 mod nn, restart")
+        dbg("bummer, m^p/2 + 1 = 0 mod nn, restart")
         return qfactor(nn)
     end
 
@@ -222,4 +236,5 @@ function createDiffMatrix(n)
     I2[1, 1] = -1
 
     return h2 * I2 * h2
+end
 end

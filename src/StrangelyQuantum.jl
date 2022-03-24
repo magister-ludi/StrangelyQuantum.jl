@@ -12,7 +12,8 @@ export Identity, InformalGate, InvFourier, Measurement, Mul, MulModulus
 export Oracle, PermutationGate, ProbabilitiesGate, R, Rotation, RotationX
 export RotationY, RotationZ, SingleQubitGate, SingleQubitMatrixGate, Swap
 export ThreeQubitGate, Toffoli, TwoQubitGate, X, Y, Z
-export SimpleQuantumExecutionEnvironment, Program, Qubit, Result, Step
+export QuantumExecutionEnvironment, SimpleQuantumExecutionEnvironment
+export Program, Qubit, Result, Step
 
 export addGate, addGates, addStep, addSteps, applyOptimize
 export calculateHighLow, calculateNewState, calculateQubitStates

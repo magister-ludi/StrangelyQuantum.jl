@@ -7,16 +7,16 @@ struct InformalGate <: AbstractInformalGate
     InformalGate(idx = 1) = new([idx], idx)
 end
 
-setMainQubitIndex(::InformalGate, idx) = nothing
+setMainQubitIndex(::AbstractInformalGate, idx) = nothing
 
-getMainQubitIndex(::InformalGate) = 1
+getMainQubitIndex(::AbstractInformalGate) = 1
 
-setAdditionalQubit(::InformalGate, idx, cnt) = nothing
+setAdditionalQubit(::AbstractInformalGate, idx, cnt) = nothing
 
-getHighestAffectedQubitIndex(gate::InformalGate) = maximum(gate.affected)
+getHighestAffectedQubitIndex(gate::AbstractInformalGate) = maximum(gate.affected)
 
-getAffectedQubitIndexes(gate::InformalGate) = gate.affected
+getAffectedQubitIndexes(gate::AbstractInformalGate) = gate.affected
 
-getGroup(gate::InformalGate) = "informal"
+getGroup(gate::AbstractInformalGate) = "informal"
 
-getMatrix(::InformalGate) = ComplexF64[0;;]
+getMatrix(::AbstractInformalGate) = ComplexF64[0;;]

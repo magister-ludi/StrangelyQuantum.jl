@@ -12,3 +12,6 @@ getSize(::ProbabilitiesGate) = -1
 getName(::ProbabilitiesGate) = "Probabilities"
 
 setInverse(::ProbabilitiesGate, v) = nothing
+
+Base.show(io::IO, gate::ProbabilitiesGate) =
+    print(io, getName(gate), "(idx=", getMainQubitIndex(gate), ")")

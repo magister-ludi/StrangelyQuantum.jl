@@ -11,8 +11,8 @@ end
 function Oracle(matrix::AbstractMatrix{<:Complex})
     gate = Oracle(1)
     gate.matrix = matrix
-    span = trunc(Int, log2(size(matrix, 1)))
-    for i = 1:span
+    gate.span = trunc(Int, log2(size(matrix, 1)))
+    for i = 1:gate.span
         setAdditionalQubit(gate, i, i)
     end
     return gate
@@ -47,3 +47,6 @@ function setInverse(gate::Oracle, inv)
         gate.matrix = gate.matrix'
     end
 end
+
+Base.show(io::IO, gate::Oracle) =
+    print(io, "Oracle(", getCaption(gate), ")")

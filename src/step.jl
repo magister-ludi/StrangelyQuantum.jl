@@ -112,6 +112,6 @@ function Base.show(io::IO, step::Step)
     if getType(step) == PseudoStep
         print(io, "Pseudo-step")
     else
-        print(io, "Step with gates [", join(step.gates, ", "), "]")
+        print(io, "Step \"", step.name, "\" with gates [", join(step.gates, ", "), "]")
     end
 end

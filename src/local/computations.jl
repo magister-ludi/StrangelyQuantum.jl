@@ -73,7 +73,7 @@ function decomposeStep(s::Step, nqubit)
             )
         end
         if gate isa ProbabilitiesGate
-            s.setInformalStep(true)
+            setInformalStep(s, true)
             return answer
         elseif gate isa AbstractBlockGate
             if gate isa AbstractControlledBlockGate
