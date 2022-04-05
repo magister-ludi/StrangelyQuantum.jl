@@ -6,7 +6,7 @@ using LinearAlgebra
 using Printf
 using Random
 
-export Classic, Block, AbstractBlockGate, BlockGate, ControlledBlockGate, Add, AddInteger
+export Classic, Block, Gate, AbstractBlockGate, BlockGate, ControlledBlockGate, Add, AddInteger
 export AddIntegerModulus, AddModulus, Cnot, Cr, Cz, Fourier, Hadamard
 export Identity, InformalGate, InvFourier, Measurement, Mul, MulModulus
 export Oracle, PermutationGate, ProbabilitiesGate, R, Rotation, RotationX
