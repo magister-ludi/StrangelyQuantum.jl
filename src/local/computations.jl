@@ -267,7 +267,7 @@ function getNextProbability(gates, v)
     nqubits = getSize(gate)
     gatedim = 1 << nqubits
     size = length(v)
-    dbg("GETNEXTPROBABILITY asked for size = ", size, " and gates = ", gates)
+    dbg("GETNEXTPROBABILITY asked for size = ", size, " and gates = [", join(gates, ", "), "]")
     if length(gates) > 1
         partdim = size ÷ gatedim
         answer = Vector{ComplexF64}(undef, size)
@@ -362,7 +362,7 @@ end
 
 function getAllGates(gates, nQubits)
     validateGates(gates, nQubits)
-    dbg("getAllGates, orig = ", gates)
+    dbg("getAllGates, orig = [", join(gates, ", "), "]")
     answer = Gate[]
     idx = nQubits
     while idx > 0
