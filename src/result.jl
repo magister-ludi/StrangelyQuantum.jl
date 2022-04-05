@@ -114,6 +114,7 @@ function measureSystem(res::Result)
     end
 
     random = rand()
+    #=
     ressize = 1 << res.nqubits
     probamp = Vector{Float64}(undef, ressize)
     probtot = 0.0
@@ -127,9 +128,12 @@ function measureSystem(res::Result)
         sel += 1
         probtot += probamp[sel + 1]
     end
+    =#
+    probamp = cumsum(abs2.(res.probability))
+    sel = findfirst(>(random), probamp) - 1
     res.measuredProbability = sel
     for i = 1:(res.nqubits)
-        setMeasuredValue(res.qubits[i], sel % 2 == 1)
+        setMeasuredValue(res.qubits[i], isodd(sel))
         sel ÷= 2
     end
 end
