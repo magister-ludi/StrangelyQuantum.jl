@@ -154,10 +154,10 @@ end
 function qfactor(nn::Integer)
     nn = Int(nn)
     dbg("We need to factor ", nn)
-    a = 1 + trunc(Int, (nn - 1) * rand(StrangeRNG))
-    dbg("Pick a random number a, a < nn: ", a)
+    a = mod1(rand(StrangelyQuantum.StrangeRNG, Int), nn)
+    dbg("Pick a random number a < nn: ", a)
     gcdan = gcd(nn, a)
-    dbg("calculate gcd(a, nn):", gcdan)
+    dbg("    gcd(", a, ", ", nn, ") = ", gcdan)
     gcdan != 1 && return gcdan
 
     p = findPeriod(a, nn)
@@ -186,29 +186,28 @@ end
 
 function measurePeriod(a::Integer, mod::Integer)
     len = ceil(Int, log2(mod))
-    offset = len
-    p = Program(2 * len + 2 + offset)
+    p = Program(3 * len + 2)
     prep = Step()
-    for i = 1:offset
+    for i = 1:len
         addGate(prep, Hadamard(i))
     end
-    prepAnc = Step(X(offset + 1))
+    prepAnc = Step(X(len + 1))
     addStep(p, prep)
     addStep(p, prepAnc)
-    for i = len:-1:(len - offset)
+    for i = len:-1:1
         m = 1
-        for _ = 1:((1 << (i - 1)) + 1)
+        for _ = 1:(1 << (i - 1))
             m = m * a % mod
         end
         mul = MulModulus(len + 1, 2 * len, m, mod)
-        cbg = AbstractControlledBlockGate(mul + 1, offset, i)
+        cbg = ControlledBlockGate(mul, len + 1, i)
         addStep(p, Step(cbg))
     end
-    addStep(p, Step(InvFourier(offset, 1)))
+    addStep(p, Step(InvFourier(len, 1)))
     result = runProgram(qee[], p)
     q = getQubits(result)
     answer = 0
-    for i = 1:offset
+    for i = 1:len
         answer += measure(q[i]) * (1 << (i - 1))
     end
     return answer
