@@ -79,9 +79,6 @@ function runProgram(qee::SimpleQuantumExecutionEnvironment, p::Program)
     printProbs(probs)
     qp = calculateQubitStates(qee, probs)
     setProbability.(qubit, qp)
-    #for  i = 0  i < nQubits  i++)
-    #    qubit[i].setProbability(qp[i])
-    #end
     measureSystem(result)
     setResult(p, result)
     return result
@@ -101,6 +98,7 @@ function printProbs(probs)
             i = 1.0
         end
         dbg(" -> (", r, ", ", i, ")")
+        #dbg(@sprintf(" -> (%.5f, %.5f)", r, i))
     end
 end
 
