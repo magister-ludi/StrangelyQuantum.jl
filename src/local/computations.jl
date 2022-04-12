@@ -211,7 +211,7 @@ function fraction(d::AbstractFloat, max::Integer)
     EPS = 1e-15
     h = 0
     k = -1
-    a = (int)d
+    a = trunc(Int, d)
     r = d - a
     h_2 = 0
     h_1 = 1
