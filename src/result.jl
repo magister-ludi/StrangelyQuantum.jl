@@ -10,7 +10,7 @@ mutable struct Result
     nqubits::Int
     nsteps::Int
     qubits::Union{Nothing, Vector{Qubit}}
-    intermediateProps::Vector{Vector{ComplexF64}}
+    intermediateProbs::Vector{Vector{ComplexF64}}
     intermediateQubits::Dict{Int, Vector{Qubit}}
     measuredProbability::Int
     probability::Vector{ComplexF64}
@@ -43,10 +43,10 @@ function calculateQubits(res::Result)
     res.nqubits == 0 && return answer
 
     lastidx = res.nsteps
-    while isempty(res.intermediateProps[lastidx])
+    while isempty(res.intermediateProbs[lastidx])
         lastidx -= 1
     end
-    d = calculateQubitStates(res, res.intermediateProps[lastidx])
+    d = calculateQubitStates(res, res.intermediateProbs[lastidx])
     for i = 1:length(answer)
         answer[i] = Qubit()
         setProbability(answer[i], d[i])
@@ -70,17 +70,16 @@ end
 getProbability(res::Result) = res.probability
 
 function setIntermediateProbability(res::Result, step, p)
-    res.intermediateProps[step] = p
+    res.intermediateProbs[step] = p
     res.intermediateQubits[step] = calculateQubits(res, p)
     res.probability = p
 end
 
 function getIntermediateProbability(res::Result, step)
-    ret = step
-    while ret > 1 && !haskey(res.intermediateProps, ret)
-        ret -= 1
+    if 1 ≤ step ≤ length(res.intermediateProbs)
+        return res.intermediateProbs[step]
     end
-    return res.intermediateProps[ret]
+    return nothing
 end
 
 function calculateQubitStates(res::Result, vectorresult)
