@@ -36,10 +36,14 @@ export setIndex, setInformalStep, setIntermediateProbability, setInverse
 export setMainQubitIndex, setMeasuredValue, setProbability, setProgram
 export setQuantumExecutionEnvironment, setResult
 
-const StrangeRNG = Xoshiro(1234) # TODO: Remove seed...
+const StrangeRNG = Xoshiro()
 const HV = 1 / sqrt(2)
 const HC = HV + 0.0im
 const HCN = -HV + 0.0im
+
+function __init__()
+    Random.seed!(StrangeRNG, reinterpret(Int64,datetime2unix(now())))
+end
 
 abstract type AbstractProgram end
 """
