@@ -19,6 +19,9 @@ mutable struct Program <: AbstractProgram
     end
 end
 
+Base.show(io::IO, p::Program) =
+    print(io, "Program with ", p.numberQubits, " qubits and ", length(p.steps), " steps.")
+
 """
 Initialize qubit at `idx`. The qubit will be in a state
 `ψ = α|0> + β|1>`.
@@ -78,17 +81,6 @@ function ensureMeasuresafe(p::Program, step::Step)
                 return false
             end
         end
-        #=
-        match = any(getGates(step)) do g
-            if g isa Measurement && getMainQubitIndex(g) ∈ mainQubits
-                @show getMainQubitIndex(g)
-                true
-            else
-                false
-            end
-        end
-        match && return false
-        =#
     end
     return true
 end
